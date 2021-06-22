@@ -55,5 +55,20 @@ public class LinkedStack implements Stack {
         return false;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(super.toString());
+        Node node = last;
+        builder.append(" [");
+        for(int i = 0; i < size; i++){
+            if(i == size - 1){
+                builder.append(node.data);
+            }else {
+                builder.append(node.data + ", ");
+            }
+            node = node.prev;
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 }

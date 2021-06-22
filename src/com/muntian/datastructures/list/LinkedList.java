@@ -1,6 +1,8 @@
 package com.muntian.datastructures.list;
 
-public class LinkedList implements List {
+import java.util.Iterator;
+
+public class LinkedList implements List, Iterable {
     Node head;
     Node tail;
 
@@ -22,33 +24,44 @@ public class LinkedList implements List {
 
     @Override
     public void add(Object value, int index) {
-        validateIndex(index);
+        validateIndexForAdd(index);
         Node newNode = new Node(value);
-        Node existingNode = getNodeByIndex(index);
 
-        if(existingNode.prev == null){
+        if (index == 0) {
             newNode.prev = null;
-            newNode.next = existingNode;
-            existingNode.prev = newNode;
             head = newNode;
+        } else if (index == size) {
+            tail.next = newNode;
+            newNode.prev = tail;
+            newNode.next = null;
+            tail = newNode;
+        } else {
+            Node existingNode = getNodeByIndex(index);
+            newNode.next = existingNode;
+            newNode.prev = existingNode.prev;
+            existingNode.prev = newNode;
+            existingNode.prev.next = newNode;
         }
-
         size++;
     }
 
-    private void validateIndex(int index) {
-        if (0 > index || index >= size) {
-            throw new IndexOutOfBoundsException(index);
-        }
-    }
 
     @Override
     public Object remove(int index) {
         validateIndex(index);
         Node node = getNodeByIndex(index);
         Object removedObj = node.value;
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
+
+        if (index == 0) {
+            head = node.next;
+            node.next.prev = null;
+        } else if (index == size - 1) {
+            tail = node.prev;
+            node.prev.next = null;
+        } else {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
         size--;
         return removedObj;
     }
@@ -141,5 +154,70 @@ public class LinkedList implements List {
             }
         }
         return null;
+    }
+
+    private void validateIndexForAdd(int index) {
+        if (0 > index || index > size) {
+            throw new IndexOutOfBoundsException(index);
+        }
+    }
+
+    private void validateIndex(int index) {
+        if (0 > index || index >= size) {
+            throw new IndexOutOfBoundsException(index);
+        }
+    }
+
+    @Override
+    public Iterator iterator() {
+        return new LinkedListIterator();
+    }
+
+    private class LinkedListIterator implements Iterator{
+        Node currentNode;
+        public LinkedListIterator(){
+            currentNode = head;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentNode != null;
+        }
+
+        @Override
+        public Object next() {
+            return currentNode;
+        }
+
+        @Override
+        public void remove() {
+        LinkedList.this.size--;
+            if(currentNode.prev != null){
+                if(currentNode.next != null){
+                    currentNode.prev.next = currentNode.next;
+                    currentNode.next.prev = currentNode.prev;
+                }
+            }
+            currentNode = currentNode.next;
+            //TODO
+        }
+    }
+
+    public static void main(String[] args) {
+        LinkedList list = new LinkedList();
+        list.add("A");
+        list.add("B");
+        list.add("C");
+        list.add("D");
+
+        System.out.println(list.toString());
+
+        Iterator iterator = list.iterator();
+        while (iterator.hasNext()){
+            iterator.next();
+            iterator.remove();
+        }
+
+        System.out.println(list.toString());
     }
 }

@@ -5,6 +5,9 @@ public class Node {
     Node prev;
     Object value;
 
+    public Node(){
+
+    }
     public Node(Object value) {
         this.value = value;
     }
